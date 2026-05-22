@@ -1,78 +1,203 @@
-# EEG Emotion Recognition using Multi-View Feature Extraction and Hybrid Feature Selection
+# EEG Emotion Recognition using DEAP and SEED Datasets
 
-This project implements an EEG-based emotion recognition pipeline using the DEAP dataset. It preprocesses EEG signals, extracts multi-view features, performs hybrid feature selection, and trains machine learning models to classify emotional states.
+This project implements an EEG-based emotion recognition system using machine learning and data mining techniques. It preprocesses EEG signals, extracts multi-view features, applies hybrid feature selection, and trains classifiers to recognize emotional states.
 
-The current implementation predicts **binary valence** labels from EEG brain signals:
+The project supports two datasets:
 
-- `1` if valence > 5
-- `0` otherwise
+- DEAP Dataset for binary valence classification
+- SEED Dataset for multi-class emotion classification
 
-## Features
+## Project Overview
 
-- EEG signal preprocessing
-- Time-domain feature extraction
-- Frequency-domain feature extraction
-- Differential entropy calculation
+The system performs:
+
+- EEG preprocessing
+- Multi-view feature extraction
 - Hybrid feature selection
 - Emotion classification
-- Accuracy evaluation
-- Confusion matrix generation
-- ROC-AUC evaluation
-- Feature importance visualization
+- Feature importance analysis
 
-## Dataset
+## Datasets Used
 
-This project uses the **DEAP dataset**.
+### 1. DEAP Dataset
 
-Download the dataset from:
+Emotion type:
 
-https://www.eecs.qmul.ac.uk/mmv/datasets/deap/
+- Binary classification
 
-Place the downloaded `.dat` files inside the `dataset/` folder:
+Predicted labels:
 
-```text
-dataset/
-├── s01.dat
-├── s02.dat
-├── s03.dat
-└── ...
-```
+- High valence
+- Low valence
+
+Dataset format:
+
+- `.dat`
+
+### 2. SEED Dataset
+
+Emotion type:
+
+- Multi-class classification
+
+Predicted labels:
+
+- Positive emotion
+- Neutral emotion
+- Negative emotion
+
+Dataset format:
+
+- `.npz`
 
 ## Project Structure
 
 ```text
-EEG_Emotion_Project/
-├── dataset/
+EEG-EMOTION-PROJECT/
+│
+├── deap_dataset/
+│   ├── s01.dat
+│   ├── s02.dat
+│   └── ...
+│
+├── seed_dataset/
+│   ├── DatasetCaricatoNoImage.npz
+│   ├── LabelsNoImage.npz
+│   └── SubjectsNoImage.npz
+│
 ├── preprocessing.py
 ├── feature_extraction.py
 ├── feature_selection.py
 ├── train_model.py
 ├── evaluate.py
-├── main.py
+│
+├── main_deap.py
+├── main_seed.py
+│
 └── README.md
 ```
 
+## Features Implemented
+
+### EEG Preprocessing
+
+- Bandpass filtering
+- Signal normalization
+
+### Multi-View Feature Extraction
+
+#### Time-Domain Features
+
+- Mean
+- Variance
+- Standard deviation
+- RMS
+- Skewness
+- Kurtosis
+
+#### Frequency-Domain Features
+
+- Alpha power
+- Beta power
+- Theta power
+- Gamma power
+
+#### Differential Entropy
+
+Formula:
+
+$$
+DE = \frac{1}{2} \ln(2\pi e\sigma^2)
+$$
+
+### Hybrid Feature Selection
+
+- SelectKBest
+- ANOVA feature selection
+
+### Machine Learning Models
+
+- Random Forest
+- SVM
+- XGBoost
+
 ## Installation
 
-### Step 1: Clone the Repository
-
-```bash
-git clone <repository-url>
-cd EEG_Emotion_Project
-```
-
-### Step 2: Install Python Libraries
+Install the required libraries:
 
 ```bash
 pip install numpy pandas scipy matplotlib seaborn scikit-learn mne xgboost shap antropy
 ```
 
-## Running the Project
+## Running DEAP Dataset
 
-Run the full pipeline with:
+Run:
 
 ```bash
-python main.py
+python main_deap.py
+```
+
+### DEAP Outputs
+
+Generated outputs:
+
+- Accuracy
+- Macro-F1 Score
+- Balanced Accuracy
+- ROC-AUC
+- Confusion Matrix
+- Feature Importance Graph
+
+### DEAP Results
+
+- Dataset shape: `(1280, 352)`
+- Selected features: `(1280, 50)`
+- Accuracy: `0.77734375`
+- Macro-F1 Score: `0.50`
+- Balanced Accuracy: `0.52`
+- ROC-AUC: `0.5197103043637696`
+
+## Running SEED Dataset
+
+Run:
+
+```bash
+python main_seed.py
+```
+
+### SEED Outputs
+
+Generated outputs:
+
+- Accuracy
+- Macro-F1 Score
+- Balanced Accuracy
+- Confusion Matrix
+- Feature Importance Graph
+
+### SEED Results
+
+- EEG data shape: `(50910, 5, 62)`
+- Flattened feature shape: `(50910, 310)`
+- Selected features: `(50910, 50)`
+- Accuracy: `1.0`
+- Macro-F1 Score: `1.00`
+- Balanced Accuracy: `1.00`
+
+### Classification Report
+
+| Class | Precision | Recall | F1-Score |
+| --- | --- | --- | --- |
+| 0 | 1.00 | 1.00 | 1.00 |
+| 1 | 1.00 | 1.00 | 1.00 |
+| 2 | 1.00 | 1.00 | 1.00 |
+
+### Confusion Matrix
+
+```text
+[[3360    0    0]
+ [   0 3312    0]
+ [   0    0 3510]]
 ```
 
 ## Workflow
@@ -91,58 +216,9 @@ Machine Learning Classification
 Emotion Prediction
 ```
 
-## Implemented Pipeline
-
-The current `main.py` script performs the following steps:
-
-1. Loads all `.dat` files from the `dataset/` folder.
-2. Extracts EEG data and valence labels.
-3. Converts valence into a binary emotion label.
-4. Applies preprocessing to each EEG channel.
-5. Extracts features from the first 32 EEG channels.
-6. Concatenates all channel features into one feature vector.
-7. Selects the top 50 features.
-8. Splits the data into training and test sets.
-9. Trains a Random Forest model.
-10. Evaluates the model and plots feature importance.
-
-## Feature Extraction
-
-### Time-Domain Features
-
-- Mean
-- Variance
-- Standard Deviation
-- RMS
-- Skewness
-- Kurtosis
-
-### Frequency-Domain Features
-
-- Alpha power
-- Beta power
-- Theta power
-- Gamma power
-
-### Differential Entropy
-
-The differential entropy is calculated as:
-
-$$
-DE = \frac{1}{2} \ln(2\pi e\sigma^2)
-$$
-
-## Machine Learning Models
-
-The project includes support for the following classifiers:
-
-- Random Forest
-- SVM
-- XGBoost
-
 ## Evaluation Metrics
 
-The project reports the following metrics:
+The project computes:
 
 - Accuracy
 - Macro-F1 Score
@@ -150,33 +226,23 @@ The project reports the following metrics:
 - ROC-AUC
 - Confusion Matrix
 
-## Obtained Results
+## Feature Importance
 
-Reported results for the current pipeline:
+Feature importance graphs are generated using the Random Forest classifier to:
 
-- Dataset shape: `(1280, 352)`
-- Selected features: `(1280, 50)`
-- Accuracy: `77.7%`
-- ROC-AUC: `0.519`
-
-## Output Graphs
-
-The project generates:
-
-- Feature importance graph
-- Confusion matrix
-- Classification report
+- Identify important EEG features
+- Improve explainability
 
 ## Future Improvements
 
 - Deep learning models
 - CNN-based EEG classification
-- Transformer-based EEG analysis
-- SHAP explainability analysis
+- Transformer models
+- SHAP explainability
 - Real-time EEG emotion recognition
 
 ## Notes
 
-- The current entrypoint focuses on binary valence classification.
-- The `train_model.py` module includes Random Forest, SVM, and XGBoost training functions.
-- Make sure the `.dat` files are present in `dataset/` before running the project.
+- The DEAP pipeline focuses on binary valence classification.
+- The SEED pipeline supports multi-class emotion classification.
+- Make sure the dataset files are present in `deap_dataset/` and `seed_dataset/` before running the scripts.
