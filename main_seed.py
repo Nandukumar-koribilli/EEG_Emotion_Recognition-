@@ -1,17 +1,16 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
-
-from sklearn.ensemble import RandomForestClassifier
-
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
 
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 
-import matplotlib.pyplot as plt
+from train_model import train_random_forest
+from train_model import train_svm
+from train_model import train_xgboost
+
+from evaluate import evaluate_model
 
 
 # Load data
@@ -62,46 +61,86 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 
-# Train Model
-model = RandomForestClassifier(n_estimators=100)
+# ============================================================
+# 1. Random Forest
+# ============================================================
+print("\n" + "=" * 60)
+print("  RANDOM FOREST")
+print("=" * 60)
 
-model.fit(X_train, y_train)
+print("\nTraining Random Forest Model...")
 
+rf_model = train_random_forest(X_train, y_train)
 
-# Predictions
-predictions = model.predict(X_test)
+print("\nEvaluating Random Forest...\n")
 
-
-# Accuracy
-accuracy = accuracy_score(y_test, predictions)
-
-print("\nAccuracy:", accuracy)
-
-
-# Classification Report
-print("\nClassification Report:\n")
-
-print(classification_report(y_test, predictions))
+rf_acc = evaluate_model(rf_model, X_test, y_test)
 
 
-# Confusion Matrix
-print("\nConfusion Matrix:\n")
+# ============================================================
+# 2. SVM
+# ============================================================
+print("\n" + "=" * 60)
+print("  SVM (Support Vector Machine)")
+print("=" * 60)
 
-print(confusion_matrix(y_test, predictions))
+print("\nTraining SVM Model...")
+
+svm_model = train_svm(X_train, y_train)
+
+print("\nEvaluating SVM...\n")
+
+svm_acc = evaluate_model(svm_model, X_test, y_test)
 
 
-# Feature Importance Graph
-importance = model.feature_importances_
+# ============================================================
+# 3. XGBoost
+# ============================================================
+print("\n" + "=" * 60)
+print("  XGBOOST")
+print("=" * 60)
 
-plt.figure(figsize=(12,6))
+print("\nTraining XGBoost Model...")
 
-plt.bar(range(len(importance)), importance)
+xgb_model = train_xgboost(X_train, y_train)
 
-plt.title("SEED Feature Importance")
+print("\nEvaluating XGBoost...\n")
 
-plt.xlabel("Feature Index")
+xgb_acc = evaluate_model(xgb_model, X_test, y_test)
 
-plt.ylabel("Importance")
+
+# ============================================================
+# Feature Importance Graphs
+# ============================================================
+print("\nGenerating Feature Importance Graphs...")
+
+fig, axes = plt.subplots(1, 3, figsize=(24, 6))
+
+# Random Forest Feature Importance
+axes[0].bar(range(len(rf_model.feature_importances_)), rf_model.feature_importances_)
+axes[0].set_title("Random Forest - Feature Importance")
+axes[0].set_xlabel("Feature Index")
+axes[0].set_ylabel("Importance")
+
+# Accuracy Comparison (all 3 models)
+model_names = ['Random Forest', 'SVM', 'XGBoost']
+accuracies = [rf_acc, svm_acc, xgb_acc]
+colors = ['#2196F3', '#FF9800', '#4CAF50']
+bars = axes[1].bar(model_names, accuracies, color=colors)
+axes[1].set_title("Model Accuracy Comparison")
+axes[1].set_ylabel("Accuracy")
+axes[1].set_ylim(0, 1.1)
+for bar, acc in zip(bars, accuracies):
+    axes[1].text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02,
+                 f'{acc:.4f}', ha='center', fontweight='bold')
+
+# XGBoost Feature Importance
+axes[2].bar(range(len(xgb_model.feature_importances_)), xgb_model.feature_importances_)
+axes[2].set_title("XGBoost - Feature Importance")
+axes[2].set_xlabel("Feature Index")
+axes[2].set_ylabel("Importance")
+
+plt.suptitle("SEED Dataset - Feature Importance Comparison", fontsize=14, fontweight='bold')
 
 plt.tight_layout()
 

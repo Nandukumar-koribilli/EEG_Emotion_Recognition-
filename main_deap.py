@@ -13,6 +13,8 @@ from feature_extraction import extract_features
 from feature_selection import select_features
 
 from train_model import train_random_forest
+from train_model import train_svm
+from train_model import train_xgboost
 
 from evaluate import evaluate_model
 
@@ -21,7 +23,7 @@ from evaluate import evaluate_model
 all_features = []
 all_labels = []
 
-dataset_path = "dataset"
+dataset_path = "deap_dataset"
 
 
 # Load all .dat files
@@ -102,32 +104,86 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 
-# Train Model
+# ============================================================
+# 1. Random Forest
+# ============================================================
+print("\n" + "=" * 60)
+print("  RANDOM FOREST")
+print("=" * 60)
+
 print("\nTraining Random Forest Model...")
 
-model = train_random_forest(X_train, y_train)
+rf_model = train_random_forest(X_train, y_train)
+
+print("\nEvaluating Random Forest...\n")
+
+rf_acc = evaluate_model(rf_model, X_test, y_test)
 
 
-# Evaluate Model
-print("\nEvaluating Model...\n")
+# ============================================================
+# 2. SVM
+# ============================================================
+print("\n" + "=" * 60)
+print("  SVM (Support Vector Machine)")
+print("=" * 60)
 
-evaluate_model(model, X_test, y_test)
+print("\nTraining SVM Model...")
+
+svm_model = train_svm(X_train, y_train)
+
+print("\nEvaluating SVM...\n")
+
+svm_acc = evaluate_model(svm_model, X_test, y_test)
 
 
-# Feature Importance Graph
-print("\nGenerating Feature Importance Graph...")
+# ============================================================
+# 3. XGBoost
+# ============================================================
+print("\n" + "=" * 60)
+print("  XGBOOST")
+print("=" * 60)
 
-importance = model.feature_importances_
+print("\nTraining XGBoost Model...")
 
-plt.figure(figsize=(12, 6))
+xgb_model = train_xgboost(X_train, y_train)
 
-plt.bar(range(len(importance)), importance)
+print("\nEvaluating XGBoost...\n")
 
-plt.title("Feature Importance")
+xgb_acc = evaluate_model(xgb_model, X_test, y_test)
 
-plt.xlabel("Feature Index")
 
-plt.ylabel("Importance")
+# ============================================================
+# Feature Importance Graphs
+# ============================================================
+print("\nGenerating Feature Importance Graphs...")
+
+fig, axes = plt.subplots(1, 3, figsize=(24, 6))
+
+# Random Forest Feature Importance
+axes[0].bar(range(len(rf_model.feature_importances_)), rf_model.feature_importances_)
+axes[0].set_title("Random Forest - Feature Importance")
+axes[0].set_xlabel("Feature Index")
+axes[0].set_ylabel("Importance")
+
+# Accuracy Comparison (all 3 models)
+model_names = ['Random Forest', 'SVM', 'XGBoost']
+accuracies = [rf_acc, svm_acc, xgb_acc]
+colors = ['#2196F3', '#FF9800', '#4CAF50']
+bars = axes[1].bar(model_names, accuracies, color=colors)
+axes[1].set_title("Model Accuracy Comparison")
+axes[1].set_ylabel("Accuracy")
+axes[1].set_ylim(0, 1.1)
+for bar, acc in zip(bars, accuracies):
+    axes[1].text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02,
+                 f'{acc:.4f}', ha='center', fontweight='bold')
+
+# XGBoost Feature Importance
+axes[2].bar(range(len(xgb_model.feature_importances_)), xgb_model.feature_importances_)
+axes[2].set_title("XGBoost - Feature Importance")
+axes[2].set_xlabel("Feature Index")
+axes[2].set_ylabel("Importance")
+
+plt.suptitle("DEAP Dataset - Feature Importance Comparison", fontsize=14, fontweight='bold')
 
 plt.tight_layout()
 

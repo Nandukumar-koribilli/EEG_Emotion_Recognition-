@@ -23,3 +23,5 @@ def evaluate_model(model, X_test, y_test):
         print("\nROC-AUC:", roc)
     except:
         pass
+
+    return accuracy
